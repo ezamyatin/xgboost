@@ -134,8 +134,6 @@ class XGBoostRegressor (
 
   def setEvalMetric(value: String): this.type = set(evalMetric, value)
 
-  def setMultiDim(value: Boolean): this.type = set(multiDim, value)
-
   def setTrainTestRatio(value: Double): this.type = set(trainTestRatio, value)
 
   def setNumEarlyStoppingRounds(value: Int): this.type = set(numEarlyStoppingRounds, value)
