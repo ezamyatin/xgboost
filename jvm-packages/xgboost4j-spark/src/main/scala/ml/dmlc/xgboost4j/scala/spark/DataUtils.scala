@@ -52,9 +52,9 @@ object DataUtils extends Serializable {
      */
     def asXGB: XGBLabeledPoint = v match {
       case v: DenseVector =>
-        XGBLabeledPoint(Array(0.0f), v.size, null, v.values.map(_.toFloat))
+        XGBLabeledPoint(Array(0.0f), v.size, null, v.values.map(_.toFloat), weight = Array(1f))
       case v: SparseVector =>
-        XGBLabeledPoint(Array(0.0f), v.size, v.indices, v.values.map(_.toFloat))
+        XGBLabeledPoint(Array(0.0f), v.size, v.indices, v.values.map(_.toFloat), weight = Array(1f))
     }
   }
 
