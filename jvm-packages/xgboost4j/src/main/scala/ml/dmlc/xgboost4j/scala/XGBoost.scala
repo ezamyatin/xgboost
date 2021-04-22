@@ -145,6 +145,18 @@ object XGBoost {
   }
 
   /**
+    * load model from modelPath
+    *
+    * @param modelJson booster modelPath
+    */
+  @throws(classOf[XGBoostError])
+  def loadModelJson(modelJson: String): Booster = {
+    val xgboostInJava = JXGBoost.loadModelJson(modelJson)
+    new Booster(xgboostInJava)
+  }
+
+
+  /**
     * Load a new Booster model from a file opened as input stream.
     * The assumption is the input stream only contains one XGBoost Model.
     * This can be used to load existing booster models saved by other XGBoost bindings.
