@@ -438,13 +438,14 @@ class XGBoostRegressionModel private[ml] (
     newModel.setSummary(summary).setParent(parent)
   }
 
+  def copy(booster: Booster): XGBoostRegressionModel = {
+    val newModel = copyValues(new XGBoostRegressionModel(uid, booster))
+    newModel.setSummary(summary).setParent(parent)
+  }
+
   override def write: MLWriter =
     new XGBoostRegressionModel.XGBoostRegressionModelWriter(this)
 
-  def setBooster(booster: Booster): XGBoostRegressionModel = {
-    _booster = booster
-    this
-  }
 }
 
 object XGBoostRegressionModel extends MLReadable[XGBoostRegressionModel] {
