@@ -216,7 +216,7 @@ object XGBoostRegressor extends DefaultParamsReadable[XGBoostRegressor] {
 
 class XGBoostRegressionModel private[ml] (
     override val uid: String,
-    private[spark] val _booster: Booster)
+    private[spark] var _booster: Booster)
   extends PredictionModel[Vector, XGBoostRegressionModel]
     with XGBoostRegressorParams with InferenceParams
     with MLWritable with Serializable {
@@ -440,6 +440,11 @@ class XGBoostRegressionModel private[ml] (
 
   override def write: MLWriter =
     new XGBoostRegressionModel.XGBoostRegressionModelWriter(this)
+
+  def setBooster(booster: Booster): XGBoostRegressionModel = {
+    _booster = booster
+    this
+  }
 }
 
 object XGBoostRegressionModel extends MLReadable[XGBoostRegressionModel] {
