@@ -222,7 +222,7 @@ class Booster private[xgboost4j](private[xgboost4j] var booster: JBooster)
     */
   @throws(classOf[XGBoostError])
   def saveModelJson(): String = {
-    return booster.saveModelJson()
+    booster.saveModelJson()
   }
   /**
    * Dump model as Array of string
