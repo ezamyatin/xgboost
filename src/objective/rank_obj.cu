@@ -904,16 +904,17 @@ class LambdaRankObj : public ObjFunction {
             gpair[pos.rindex] += GradientPair(g * w, 2.0f * w * h);
             gpair[neg.rindex] += GradientPair(-g * w, 2.0f * w * h);
             if (pair.pos_index < pair.neg_index) {
-              const auto x = pos.pred - neg.pred;
+              const bst_float x = neg.pred - pos.pred;
               loss += (x > 20 ? x : log(1 + exp(x))) * w;
             } else {
-              const auto x = neg.pred - pos.pred;
+              const bst_float x = pos.pred - neg.pred;
               loss += (x > 20 ? x : log(1 + exp(x))) * w;
             }
           }
         }
       }
     }
+    //LOG(CONSOLE) << "LOSS VALUE " << loss;
   }
 
 #if defined(__CUDACC__)
