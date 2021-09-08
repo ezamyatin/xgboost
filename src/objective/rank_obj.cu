@@ -904,9 +904,11 @@ class LambdaRankObj : public ObjFunction {
             gpair[pos.rindex] += GradientPair(g * w, 2.0f * w * h);
             gpair[neg.rindex] += GradientPair(-g * w, 2.0f * w * h);
             if (pair.pos_index < pair.neg_index) {
-              loss += w * log(p);
+              const auto x = pos.pred - neg.pred;
+              loss += (x > 20 ? x : log(1 + exp(x))) * w;
             } else {
-              loss += w * log(1 - p);
+              const auto x = neg.pred - pos.pred;
+              loss += (x > 20 ? x : log(1 + exp(x))) * w;
             }
           }
         }
