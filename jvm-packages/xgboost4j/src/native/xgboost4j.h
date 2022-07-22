@@ -225,14 +225,6 @@ JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGBoosterDumpModel
 
 /*
  * Class:     ml_dmlc_xgboost4j_java_XGBoostJNI
- * Method:    XGBoosterDumpModelEx
- * Signature: (JLjava/lang/String;I[[Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGBoosterSaveJson
-        (JNIEnv *, jclass, jlong, jobjectArray);
-
-/*
- * Class:     ml_dmlc_xgboost4j_java_XGBoostJNI
  * Method:    XGBoosterDumpModelExWithFeatures
  * Signature: (JLjava/lang/String;I[[Ljava/lang/String;)I
  */

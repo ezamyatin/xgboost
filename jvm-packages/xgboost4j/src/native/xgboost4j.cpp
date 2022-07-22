@@ -710,29 +710,6 @@ JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGBoosterDumpModel
 
 /*
  * Class:     ml_dmlc_xgboost4j_java_XGBoostJNI
- * Method:    XGBoosterSaveJson
- * Signature: (JLjava/lang/String;I)[Ljava/lang/String;
- */
-JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGBoosterSaveJson
-        (JNIEnv *jenv, jclass jcls, jlong jhandle, jobjectArray jout) {
-  BoosterHandle handle = (BoosterHandle) jhandle;
-  bst_ulong len = 0;
-  char *result;
-
-  int ret = XGBoosterSaveJson(handle, &len, (const char **) &result);
-  JVM_CHECK_CALL(ret);
-
-  jstring jinfo = nullptr;
-  if (result != nullptr) {
-    jinfo = jenv->NewStringUTF(result);
-  }
-  jenv->SetObjectArrayElement(jout, 0, jinfo);
-
-  return ret;
-}
-
-/*
- * Class:     ml_dmlc_xgboost4j_java_XGBoostJNI
  * Method:    XGBoosterDumpModelExWithFeatures
  * Signature: (JLjava/lang/String;I[[Ljava/lang/String;)I
  */
