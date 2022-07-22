@@ -628,24 +628,6 @@ JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGBoosterLoadModel
 
 /*
  * Class:     ml_dmlc_xgboost4j_java_XGBoostJNI
- * Method:    XGBoosterLoadModelJson
- * Signature: (JLjava/lang/String;)V
- */
-JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGBoosterLoadModelJson
-        (JNIEnv *jenv, jclass jcls, jlong jhandle, jstring jmodel_str) {
-  BoosterHandle handle = (BoosterHandle) jhandle;
-  const char* model_str = jenv->GetStringUTFChars(jmodel_str, 0);
-
-  int ret = XGBoosterLoadModelJson(handle, model_str);
-  JVM_CHECK_CALL(ret);
-  if (model_str) {
-    jenv->ReleaseStringUTFChars(jmodel_str,model_str);
-  }
-  return ret;
-}
-
-/*
- * Class:     ml_dmlc_xgboost4j_java_XGBoostJNI
  * Method:    XGBoosterSaveModel
  * Signature: (JLjava/lang/String;)V
  */
