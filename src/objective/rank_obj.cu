@@ -824,8 +824,7 @@ class LambdaRankObj : public ObjFunction {
     const auto ngroup = static_cast<bst_omp_uint>(gptr.size() - 1);
     out_gpair->Resize(preds.Size());
     const auto ndim = labels.size() / preds_h.size();
-    double loss = 0;
-    #pragma omp parallel reduction(+:loss)
+    #pragma omp parallel
     {
       // parallel construct, declare random number generator here, so that each
       // thread use its own random number generator, seed by thread id and current iteration
@@ -903,18 +902,10 @@ class LambdaRankObj : public ObjFunction {
             // accumulate gradient and hessian in both pid, and nid
             gpair[pos.rindex] += GradientPair(g * w, 2.0f * w * h);
             gpair[neg.rindex] += GradientPair(-g * w, 2.0f * w * h);
-            if (pair.pos_index < pair.neg_index) {
-              const bst_float x = neg.pred - pos.pred;
-              loss += (x > 20 ? x : log(1 + exp(x))) * w;
-            } else {
-              const bst_float x = pos.pred - neg.pred;
-              loss += (x > 20 ? x : log(1 + exp(x))) * w;
-            }
           }
         }
       }
     }
-    //LOG(CONSOLE) << "LOSS VALUE " << loss;
   }
 
 #if defined(__CUDACC__)
