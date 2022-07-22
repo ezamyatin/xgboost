@@ -747,7 +747,6 @@ XGB_DLL int XGBoosterPredict(BoosterHandle handle,
  */
 XGB_DLL int XGBoosterLoadModel(BoosterHandle handle,
                                const char *fname);
-
 /*!
  * \brief Save model into existing file
  * \param handle handle
@@ -832,7 +831,6 @@ XGB_DLL int XGBoosterSaveRabitCheckpoint(BoosterHandle handle);
  */
 XGB_DLL int XGBoosterSaveJsonConfig(BoosterHandle handle, bst_ulong *out_len,
                                     char const **out_str);
-
 /*!
  * \brief Load XGBoost's internal configuration from a JSON document.  Currently the
  *        support is experimental, function signature may change in the future without
