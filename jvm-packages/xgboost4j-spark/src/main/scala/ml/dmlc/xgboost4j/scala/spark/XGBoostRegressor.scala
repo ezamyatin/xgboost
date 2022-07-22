@@ -163,6 +163,8 @@ class XGBoostRegressor (
     }
   }
 
+  override def fit(dataset: Dataset[_]): XGBoostRegressionModel = train(dataset)
+
   override protected def train(dataset: Dataset[_]): XGBoostRegressionModel = {
 
     if (!isDefined(evalMetric) || $(evalMetric).isEmpty) {
@@ -173,7 +175,12 @@ class XGBoostRegressor (
       set(objectiveType, "regression")
     }
 
-    val weight = if (!isDefined(weightCol) || $(weightCol).isEmpty) lit(1.0) else col($(weightCol))
+    val weight = if (!isDefined(weightCol) || $(weightCol).isEmpty) {
+      assert(false);
+      null.asInstanceOf[Column]
+    } else {
+      col($(weightCol))
+    }
     val baseMargin = if (!isDefined(baseMarginCol) || $(baseMarginCol).isEmpty) {
       lit(Float.NaN)
     } else {
@@ -189,7 +196,6 @@ class XGBoostRegressor (
           weight, baseMargin, Some(group), $(numWorkers), needDeterministicRepartitioning,
           dataFrame).head)
     }
-    transformSchema(dataset.schema, logging = true)
     val derivedXGBParamMap = MLlib2XGBoostParams
     // All non-null param maps in XGBoostRegressor are in derivedXGBParamMap.
     val (_booster, _metrics) = XGBoost.trainDistributed(trainingSet, derivedXGBParamMap,
@@ -210,7 +216,7 @@ object XGBoostRegressor extends DefaultParamsReadable[XGBoostRegressor] {
 
 class XGBoostRegressionModel private[ml] (
     override val uid: String,
-    private[spark] val _booster: Booster)
+    private[spark] var _booster: Booster)
   extends PredictionModel[Vector, XGBoostRegressionModel]
     with XGBoostRegressorParams with InferenceParams
     with MLWritable with Serializable {
@@ -432,8 +438,14 @@ class XGBoostRegressionModel private[ml] (
     newModel.setSummary(summary).setParent(parent)
   }
 
+  def copy(booster: Booster): XGBoostRegressionModel = {
+    val newModel = copyValues(new XGBoostRegressionModel(uid, booster))
+    newModel.setSummary(summary).setParent(parent)
+  }
+
   override def write: MLWriter =
     new XGBoostRegressionModel.XGBoostRegressionModelWriter(this)
+
 }
 
 object XGBoostRegressionModel extends MLReadable[XGBoostRegressionModel] {

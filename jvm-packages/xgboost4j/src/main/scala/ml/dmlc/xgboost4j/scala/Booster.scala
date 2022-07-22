@@ -217,6 +217,14 @@ class Booster private[xgboost4j](private[xgboost4j] var booster: JBooster)
     booster.saveModel(out)
   }
   /**
+    * save model to Output stream
+    *
+    */
+  @throws(classOf[XGBoostError])
+  def saveModelJson(): String = {
+    booster.saveModelJson()
+  }
+  /**
    * Dump model as Array of string
    *
    * @param featureMap featureMap file

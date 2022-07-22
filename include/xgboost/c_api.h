@@ -232,6 +232,8 @@ typedef struct {  // NOLINT(*)
   int* index;
   /*! \brief feature values */
   float* value;
+
+  size_t ndim;
 } XGBoostBatchCSR;
 
 /*!
@@ -745,6 +747,10 @@ XGB_DLL int XGBoosterPredict(BoosterHandle handle,
  */
 XGB_DLL int XGBoosterLoadModel(BoosterHandle handle,
                                const char *fname);
+
+XGB_DLL int XGBoosterLoadModelJson(BoosterHandle handle,
+                                   const char *model_str);
+
 /*!
  * \brief Save model into existing file
  * \param handle handle
@@ -829,6 +835,21 @@ XGB_DLL int XGBoosterSaveRabitCheckpoint(BoosterHandle handle);
  */
 XGB_DLL int XGBoosterSaveJsonConfig(BoosterHandle handle, bst_ulong *out_len,
                                     char const **out_str);
+
+/*!
+ * \brief Save XGBoost's internal configuration into a JSON document.  Currently the
+ *        support is experimental, function signature may change in the future without
+ *        notice.
+ *
+ * \param handle handle to Booster object.
+ * \param out_len length of output string
+ * \param out_str A valid pointer to array of characters.  The characters array is
+ *                allocated and managed by XGBoost, while pointer to that array needs to
+ *                be managed by caller.
+ * \return 0 when success, -1 when failure happens
+ */
+XGB_DLL int XGBoosterSaveJson(BoosterHandle handle, bst_ulong *out_len, char const **out_str);
+
 /*!
  * \brief Load XGBoost's internal configuration from a JSON document.  Currently the
  *        support is experimental, function signature may change in the future without

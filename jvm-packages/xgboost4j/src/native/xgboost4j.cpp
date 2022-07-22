@@ -93,22 +93,25 @@ XGB_EXTERN_C int XGBoost4jCallbackDataIterNext(
           batch, jenv->GetFieldID(batchClass, "featureValue", "[F"));
       jint jcols = jenv->GetIntField(
           batch, jenv->GetFieldID(batchClass, "featureCols", "I"));
+      jint jndim = jenv->GetIntField(
+              batch, jenv->GetFieldID(batchClass, "ndim", "I"));
       XGBoostBatchCSR cbatch;
       cbatch.size = jenv->GetArrayLength(joffset) - 1;
       cbatch.columns = jcols;
+      cbatch.ndim = jndim;
       cbatch.offset = reinterpret_cast<jlong *>(
           jenv->GetLongArrayElements(joffset, 0));
       if (jlabel != nullptr) {
         cbatch.label = jenv->GetFloatArrayElements(jlabel, 0);
-        CHECK_EQ(jenv->GetArrayLength(jlabel), static_cast<long>(cbatch.size))
-            << "batch.label.length must equal batch.numRows()";
+        //CHECK_EQ(jenv->GetArrayLength(jlabel), static_cast<long>(cbatch.size))
+        //    << "batch.label.length must equal batch.numRows()";
       } else {
         cbatch.label = nullptr;
       }
       if (jweight != nullptr) {
         cbatch.weight = jenv->GetFloatArrayElements(jweight, 0);
-        CHECK_EQ(jenv->GetArrayLength(jweight), static_cast<long>(cbatch.size))
-            << "batch.weight.length must equal batch.numRows()";
+        //CHECK_EQ(jenv->GetArrayLength(jweight), static_cast<long>(cbatch.size))
+        //    << "batch.weight.length must equal batch.numRows()";
       } else {
         cbatch.weight = nullptr;
       }
@@ -625,6 +628,24 @@ JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGBoosterLoadModel
 
 /*
  * Class:     ml_dmlc_xgboost4j_java_XGBoostJNI
+ * Method:    XGBoosterLoadModelJson
+ * Signature: (JLjava/lang/String;)V
+ */
+JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGBoosterLoadModelJson
+        (JNIEnv *jenv, jclass jcls, jlong jhandle, jstring jmodel_str) {
+  BoosterHandle handle = (BoosterHandle) jhandle;
+  const char* model_str = jenv->GetStringUTFChars(jmodel_str, 0);
+
+  int ret = XGBoosterLoadModelJson(handle, model_str);
+  JVM_CHECK_CALL(ret);
+  if (model_str) {
+    jenv->ReleaseStringUTFChars(jmodel_str,model_str);
+  }
+  return ret;
+}
+
+/*
+ * Class:     ml_dmlc_xgboost4j_java_XGBoostJNI
  * Method:    XGBoosterSaveModel
  * Signature: (JLjava/lang/String;)V
  */
@@ -702,6 +723,29 @@ JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGBoosterDumpModel
   jenv->SetObjectArrayElement(jout, 0, jinfos);
 
   if (fmap) jenv->ReleaseStringUTFChars(jfmap, (const char *)fmap);
+  return ret;
+}
+
+/*
+ * Class:     ml_dmlc_xgboost4j_java_XGBoostJNI
+ * Method:    XGBoosterSaveJson
+ * Signature: (JLjava/lang/String;I)[Ljava/lang/String;
+ */
+JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGBoosterSaveJson
+        (JNIEnv *jenv, jclass jcls, jlong jhandle, jobjectArray jout) {
+  BoosterHandle handle = (BoosterHandle) jhandle;
+  bst_ulong len = 0;
+  char *result;
+
+  int ret = XGBoosterSaveJson(handle, &len, (const char **) &result);
+  JVM_CHECK_CALL(ret);
+
+  jstring jinfo = nullptr;
+  if (result != nullptr) {
+    jinfo = jenv->NewStringUTF(result);
+  }
+  jenv->SetObjectArrayElement(jout, 0, jinfo);
+
   return ret;
 }
 

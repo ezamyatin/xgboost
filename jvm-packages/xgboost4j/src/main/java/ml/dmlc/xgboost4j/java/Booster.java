@@ -67,6 +67,15 @@ public class Booster implements Serializable, KryoSerializable {
     return ret;
   }
 
+  static Booster loadModelJson(String modelJson) throws XGBoostError {
+    if (modelJson == null) {
+      throw new NullPointerException("modelJson : null");
+    }
+    Booster ret = new Booster(new HashMap<String, Object>(), new DMatrix[0]);
+    XGBoostJNI.checkCall(XGBoostJNI.XGBoosterLoadModelJson(ret.handle, modelJson));
+    return ret;
+  }
+
   /**
    * Load a new Booster model from a file opened as input stream.
    * The assumption is the input stream only contains one XGBoost Model.
@@ -430,6 +439,13 @@ public class Booster implements Serializable, KryoSerializable {
     XGBoostJNI.checkCall(
             XGBoostJNI.XGBoosterDumpModelEx(handle, featureMap, statsFlag, format, modelInfos));
     return modelInfos[0];
+  }
+
+  public String saveModelJson()
+         throws XGBoostError {
+    String[] res = new String[1];
+    XGBoostJNI.checkCall(XGBoostJNI.XGBoosterSaveJson(handle, res));
+    return res[0];
   }
 
   /**

@@ -103,6 +103,8 @@ class XGBoostJNI {
 
   public final static native int XGBoosterLoadModel(long handle, String fname);
 
+  public final static native int XGBoosterLoadModelJson(long handle, String modelJson);
+
   public final static native int XGBoosterSaveModel(long handle, String fname);
 
   public final static native int XGBoosterLoadModelFromBuffer(long handle, byte[] bytes);
@@ -111,6 +113,8 @@ class XGBoostJNI {
 
   public final static native int XGBoosterDumpModelEx(long handle, String fmap, int with_stats,
                                                       String format, String[][] out_strings);
+
+  public final static native int XGBoosterSaveJson(long handle, String[] out_str);
 
   public final static native int XGBoosterDumpModelExWithFeatures(
     long handle, String[] feature_names, int with_stats, String format, String[][] out_strings);

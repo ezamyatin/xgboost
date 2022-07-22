@@ -286,8 +286,8 @@ struct EvalRank : public Metric, public EvalRankConfig {
   bst_float Eval(const HostDeviceVector<bst_float> &preds,
                  const MetaInfo &info,
                  bool distributed) override {
-    CHECK_EQ(preds.Size(), info.labels_.Size())
-        << "label size predict size not match";
+    ///CHECK_EQ(preds.Size(), info.labels_.Size())
+    /// << "label size predict size not match";
 
     // quick consistency when group is not available
     std::vector<unsigned> tgptr(2, 0);
@@ -301,6 +301,8 @@ struct EvalRank : public Metric, public EvalRankConfig {
     const auto ngroups = static_cast<bst_omp_uint>(gptr.size() - 1);
     // sum statistics
     double sum_metric = 0.0f;
+    double n_active_groups = 0.0f;
+    const auto ndim = info.labels_.Size() / preds.Size();
 
     // Check and see if we have the GPU metric registered in the internal registry
     if (tparam_->gpu_id >= 0) {
@@ -316,17 +318,29 @@ struct EvalRank : public Metric, public EvalRankConfig {
       const auto &labels = info.labels_.ConstHostVector();
       const auto &h_preds = preds.ConstHostVector();
 
-      #pragma omp parallel reduction(+:sum_metric)
+      #pragma omp parallel reduction(+:sum_metric,n_active_groups)
       {
         // each thread takes a local rec
         PredIndPairContainer rec;
         #pragma omp for schedule(static)
         for (bst_omp_uint k = 0; k < ngroups; ++k) {
-          rec.clear();
-          for (unsigned j = gptr[k]; j < gptr[k + 1]; ++j) {
-            rec.emplace_back(h_preds[j], static_cast<int>(labels[j]));
+          for (unsigned e = 0; e < ndim; ++e) {
+            rec.clear();
+            bool is_active = false;
+            uint32_t x = static_cast<int>(labels[gptr[k] * ndim + e]);
+
+            for (unsigned j = gptr[k]; j < gptr[k + 1]; ++j) {
+              if (std::isnan(labels[j * ndim + e])) {continue;}
+              if (x != static_cast<int>(labels[j * ndim + e])) {
+                is_active = true;
+              }
+              rec.emplace_back(h_preds[j], static_cast<int>(labels[j * ndim + e]));
+            }
+            if (is_active) {
+              sum_metric += this->EvalGroup(&rec);
+              n_active_groups += 1;
+            }
           }
-          sum_metric += this->EvalGroup(&rec);
         }
       }
     }
@@ -334,12 +348,12 @@ struct EvalRank : public Metric, public EvalRankConfig {
     if (distributed) {
       bst_float dat[2];
       dat[0] = static_cast<bst_float>(sum_metric);
-      dat[1] = static_cast<bst_float>(ngroups);
+      dat[1] = static_cast<bst_float>(n_active_groups);
       // approximately estimate the metric using mean
       rabit::Allreduce<rabit::op::Sum>(dat, 2);
       return dat[0] / dat[1];
     } else {
-      return static_cast<bst_float>(sum_metric) / ngroups;
+      return static_cast<bst_float>(sum_metric) / n_active_groups;
     }
   }
 
