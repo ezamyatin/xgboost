@@ -536,24 +536,6 @@ XGB_DLL int XGBoosterSaveJsonConfig(BoosterHandle handle,
   API_END();
 }
 
-XGB_DLL int XGBoosterSaveJson(BoosterHandle handle,
-                              xgboost::bst_ulong *out_len,
-                              char const** out_str) {
-  API_BEGIN();
-  CHECK_HANDLE();
-    auto *learner = static_cast<Learner *>(handle);
-    learner->Configure();
-    Json out { Object() };
-    learner->SaveModel(&out);
-
-    std::string& raw_str = learner->GetThreadLocal().ret_str;
-    Json::Dump(out, &raw_str);
-    *out_str = raw_str.c_str();
-    *out_len = static_cast<xgboost::bst_ulong>(raw_str.length());
-  API_END();
-}
-
-
 XGB_DLL int XGBoosterUpdateOneIter(BoosterHandle handle,
                                    int iter,
                                    DMatrixHandle dtrain) {
@@ -741,17 +723,6 @@ XGB_DLL int XGBoosterLoadModel(BoosterHandle handle, const char* fname) {
     std::unique_ptr<dmlc::Stream> fi(dmlc::Stream::Create(fname, "r"));
     static_cast<Learner*>(handle)->LoadModel(fi.get());
   }
-  API_END();
-}
-
-XGB_DLL int XGBoosterLoadModelJson(BoosterHandle handle, const char* model_str) {
-  API_BEGIN();
-  CHECK_HANDLE();
-    std::string str = model_str;
-    CHECK_GT(str.size(), 2);
-    CHECK_EQ(str[0], '{');
-    Json in { Json::Load({str.c_str(), str.size()}) };
-    static_cast<Learner*>(handle)->LoadModel(in);
   API_END();
 }
 
