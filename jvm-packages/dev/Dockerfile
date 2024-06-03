@@ -25,6 +25,7 @@ RUN \
     yum-config-manager --enable centos-sclo-rh-testing && \
     yum -y update && \
     yum install -y devtoolset-7-gcc devtoolset-7-binutils devtoolset-7-gcc-c++ && \
+    yum install -y blas-devel lapack-devel && \
     # Python
     wget https://repo.continuum.io/miniconda/Miniconda3-4.5.12-Linux-x86_64.sh && \
     bash Miniconda3-4.5.12-Linux-x86_64.sh -b -p /opt/python && \
@@ -44,7 +45,6 @@ ENV CPP=/opt/rh/devtoolset-7/root/usr/bin/cpp
 ENV JAVA_HOME=/usr/lib/jvm/java
 
 # Install Python packages
-RUN \
-    pip install numpy pytest scipy scikit-learn wheel kubernetes urllib3==1.22 awscli
+# RUN pip install numpy pytest scipy scikit-learn wheel kubernetes urllib3==1.22 awscli
 
 WORKDIR /xgboost
