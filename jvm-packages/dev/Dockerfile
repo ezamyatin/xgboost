@@ -16,26 +16,49 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM centos:7
+FROM centos:7.9.2009
+
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN \
+echo "" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "[centos-sclo-rh]" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "name=CentOS-$releasever - SCLo rh" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "baseurl=http://vault.centos.org/altarch/$releasever/sclo/$basearch/rh" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "gpgcheck=1" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "enabled=0" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "       file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7-aarch64" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "       " >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "[centos-sclo-sclo]" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "name=CentOS-$releasever - SCLo sclo" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "baseurl=http://vault.centos.org/altarch/$releasever/sclo/$basearch/sclo" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "gpgcheck=1" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "enabled=0" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "       file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7-aarch64" >> /etc/yum.repos.d/CentOS-Base.repo && \
+echo "" >> /etc/yum.repos.d/CentOS-Base.repo
+
+RUN yum clean all && yum makecache
 
 # Install all basic requirements
-RUN \
-    yum -y update && \
-    yum install -y make bzip2 tar unzip wget xz git centos-release-scl yum-utils java-1.8.0-openjdk-devel && \
-    yum-config-manager --enable centos-sclo-rh-testing && \
-    yum -y update && \
-    yum install -y devtoolset-7-gcc devtoolset-7-binutils devtoolset-7-gcc-c++ && \
-    yum install -y blas-devel lapack-devel && \
+RUN yum -y update
+RUN yum install -y make bzip2 tar unzip wget xz git centos-release-scl yum-utils java-1.8.0-openjdk-devel
+RUN yum-config-manager --enable centos-sclo-rh-testing --enablerepo='centos-sclo-rh' --enablerepo='centos-sclo-sclo' 
+#RUN yum -y update
+RUN yum install -y devtoolset-7-gcc devtoolset-7-binutils devtoolset-7-gcc-c++
+RUN yum install -y blas-devel lapack-devel
+
     # Python
-    wget https://repo.continuum.io/miniconda/Miniconda3-4.5.12-Linux-x86_64.sh && \
-    bash Miniconda3-4.5.12-Linux-x86_64.sh -b -p /opt/python && \
+RUN wget https://repo.continuum.io/miniconda/Miniconda3-4.5.12-Linux-x86_64.sh
+RUN bash Miniconda3-4.5.12-Linux-x86_64.sh -b -p /opt/python
     # CMake
-    wget -nv -nc https://cmake.org/files/v3.13/cmake-3.13.0-Linux-x86_64.sh --no-check-certificate && \
-    bash cmake-3.13.0-Linux-x86_64.sh --skip-license --prefix=/usr && \
+RUN wget -nv -nc https://cmake.org/files/v3.13/cmake-3.13.0-Linux-x86_64.sh --no-check-certificate
+RUN bash cmake-3.13.0-Linux-x86_64.sh --skip-license --prefix=/usr
     # Maven
-    wget https://archive.apache.org/dist/maven/maven-3/3.6.1/binaries/apache-maven-3.6.1-bin.tar.gz && \
-    tar xvf apache-maven-3.6.1-bin.tar.gz -C /opt && \
-    ln -s /opt/apache-maven-3.6.1/ /opt/maven
+RUN wget https://archive.apache.org/dist/maven/maven-3/3.6.1/binaries/apache-maven-3.6.1-bin.tar.gz
+RUN tar xvf apache-maven-3.6.1-bin.tar.gz -C /opt
+RUN ln -s /opt/apache-maven-3.6.1/ /opt/maven
 
 # Set the required environment variables
 ENV PATH=/opt/python/bin:/opt/maven/bin:$PATH
