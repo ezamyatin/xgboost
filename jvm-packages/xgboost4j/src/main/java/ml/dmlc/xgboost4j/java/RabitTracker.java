@@ -38,8 +38,8 @@ public class RabitTracker implements IRabitTracker {
     try {
       initTrackerPy();
     } catch (IOException ex) {
-      logger.error("load tracker library failed.");
-      logger.error(ex);
+      System.err.println("xgboost4j logger " + "load tracker library failed.");
+      System.err.println("xgboost4j logger " + ex);
     }
   }
 
@@ -55,17 +55,17 @@ public class RabitTracker implements IRabitTracker {
       String line;
       try {
         while ((line = reader.readLine()) != null) {
-          trackerProcessLogger.info(line);
+          System.err.println("xgboost4j logger " + line);
         }
         trackerProcess.get().waitFor();
-        trackerProcessLogger.info("Tracker Process ends with exit code " +
+        System.err.println("xgboost4j logger " + "Tracker Process ends with exit code " +
                 trackerProcess.get().exitValue());
       } catch (IOException ex) {
-        trackerProcessLogger.error(ex.toString());
+        System.err.println("xgboost4j logger " + ex.toString());
       } catch (InterruptedException ie) {
         // we should not get here as RabitTracker is accessed in the main thread
         ie.printStackTrace();
-        logger.error("the RabitTracker thread is terminated unexpectedly");
+        System.err.println("xgboost4j logger " + "the RabitTracker thread is terminated unexpectedly");
       }
     }
   }
@@ -88,11 +88,11 @@ public class RabitTracker implements IRabitTracker {
   }
 
   public void uncaughtException(Thread t, Throwable e) {
-    logger.error("Uncaught exception thrown by worker:", e);
+    System.err.println("xgboost4j logger " + "Uncaught exception thrown by worker:" + e.toString());
     try {
       Thread.sleep(5000L);
     } catch (InterruptedException ex) {
-      logger.error(ex);
+      System.err.println("xgboost4j logger " + ex);
     } finally {
       trackerProcess.get().destroy();
     }
@@ -122,7 +122,7 @@ public class RabitTracker implements IRabitTracker {
       }
       reader.close();
     } catch (IOException ioe){
-      logger.error("cannot get runtime configuration from tracker process");
+      System.err.println("xgboost4j logger " + "cannot get runtime configuration from tracker process");
       ioe.printStackTrace();
       throw ioe;
     }
@@ -162,7 +162,7 @@ public class RabitTracker implements IRabitTracker {
 
   public boolean start(long timeout) {
     if (timeout > 0L) {
-      logger.warn("Python RabitTracker does not support timeout. " +
+      System.err.println("xgboost4j logger " + "Python RabitTracker does not support timeout. " +
               "The tracker will wait for all workers to connect indefinitely, unless " +
               "it is interrupted manually. Use the Scala RabitTracker for timeout support.");
     }
@@ -176,7 +176,7 @@ public class RabitTracker implements IRabitTracker {
       logger_thread.start();
       return true;
     } else {
-      logger.error("FAULT: failed to start tracker process");
+      System.err.println("xgboost4j logger " + "FAULT: failed to start tracker process");
       stop();
       return false;
     }
@@ -184,7 +184,7 @@ public class RabitTracker implements IRabitTracker {
 
   public int waitFor(long timeout) {
     if (timeout > 0L) {
-      logger.warn("Python RabitTracker does not support timeout. " +
+      System.err.println("xgboost4j logger " + "Python RabitTracker does not support timeout. " +
               "The tracker will wait for either all workers to finish tasks and send " +
               "shutdown signal, or manual interruptions. " +
               "Use the Scala RabitTracker for timeout support.");
@@ -193,13 +193,13 @@ public class RabitTracker implements IRabitTracker {
     try {
       trackerProcess.get().waitFor();
       int returnVal = trackerProcess.get().exitValue();
-      logger.info("Tracker Process ends with exit code " + returnVal);
+      System.err.println("xgboost4j logger " + "Tracker Process ends with exit code " + returnVal);
       stop();
       return returnVal;
     } catch (InterruptedException e) {
       // we should not get here as RabitTracker is accessed in the main thread
       e.printStackTrace();
-      logger.error("the RabitTracker thread is terminated unexpectedly");
+      System.err.println("xgboost4j logger " + "the RabitTracker thread is terminated unexpectedly");
       return TrackerStatus.INTERRUPTED.getStatusCode();
     }
   }

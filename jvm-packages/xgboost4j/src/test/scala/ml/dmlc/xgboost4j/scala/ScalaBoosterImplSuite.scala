@@ -53,7 +53,7 @@ class ScalaBoosterImplSuite extends FunSuite {
         labels = dmat.getLabel
       } catch {
         case ex: XGBoostError =>
-          logger.error(ex)
+          System.err.println("xgboost4j logger " + ex)
           return -1f
       }
       val nrow: Int = predicts.length

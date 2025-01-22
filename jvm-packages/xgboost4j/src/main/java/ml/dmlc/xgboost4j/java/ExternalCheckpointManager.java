@@ -54,7 +54,7 @@ public class ExternalCheckpointManager {
       int latestVersion = versions.stream().max(Comparator.comparing(Integer::valueOf)).get();
       String checkpointPath = getPath(latestVersion);
       InputStream in = fs.open(new Path(checkpointPath));
-      logger.info("loaded checkpoint from " + checkpointPath);
+      System.err.println("xgboost4j logger " + "loaded checkpoint from " + checkpointPath);
       Booster booster = XGBoost.loadModel(in);
       booster.setVersion(latestVersion);
       return booster;
@@ -71,12 +71,12 @@ public class ExternalCheckpointManager {
     try (OutputStream out = fs.create(new Path(tempPath), true)) {
       boosterToCheckpoint.saveModel(out);
       fs.rename(new Path(tempPath), new Path(eventualPath));
-      logger.info("saving checkpoint with version " + boosterToCheckpoint.getVersion());
+      System.err.println("xgboost4j logger " + "saving checkpoint with version " + boosterToCheckpoint.getVersion());
       prevModelPaths.stream().forEach(path -> {
         try {
           fs.delete(new Path(path), true);
         } catch (IOException e) {
-          logger.error("failed to delete outdated checkpoint at " + path, e);
+          System.err.println("xgboost4j logger " + "failed to delete outdated checkpoint at " + path + " " + e);
         }
       });
     }
@@ -87,7 +87,7 @@ public class ExternalCheckpointManager {
       try {
         fs.delete(new Path(getPath(v)), true);
       } catch (IOException e) {
-        logger.error("failed to clean checkpoint from other training instance", e);
+        System.err.println("xgboost4j logger " + "failed to clean checkpoint from other training instance" + " " + e);
       }
     });
   }

@@ -115,7 +115,7 @@ private[this] class XGBoostExecutionParamsFactory(rawParams: Map[String, Any], s
       }
     if (sparkSslEnabled) {
       if (xgboostSparkIgnoreSsl) {
-        logger.warn(s"spark-xgboost is being run without encrypting data in transit!  " +
+        System.err.println("xgboost4j-spark logger " + s"spark-xgboost is being run without encrypting data in transit!  " +
           s"Spark Conf spark.ssl.enabled=true was overridden with xgboost.spark.ignoreSsl=true.")
       } else {
         throw new Exception("xgboost-spark found spark.ssl.enabled=true to encrypt data " +
@@ -154,7 +154,7 @@ private[this] class XGBoostExecutionParamsFactory(rawParams: Map[String, Any], s
       }
       val eval_metric = overridedParams("eval_metric").toString
       val maximize = LearningTaskParams.evalMetricsToMaximize contains eval_metric
-      logger.info("parameter \"maximize_evaluation_metrics\" is set to " + maximize)
+      System.err.println("xgboost4j-spark logger " + "parameter \"maximize_evaluation_metrics\" is set to " + maximize)
       overridedParams += ("maximize_evaluation_metrics" -> maximize)
     }
     overridedParams
@@ -181,7 +181,7 @@ private[this] class XGBoostExecutionParamsFactory(rawParams: Map[String, Any], s
       treeMethod = Some(overridedParams("tree_method").asInstanceOf[String])
     }
     if (overridedParams.contains("train_test_ratio")) {
-      logger.warn("train_test_ratio is deprecated since XGBoost 0.82, we recommend to explicitly" +
+      System.err.println("xgboost4j-spark logger " + "train_test_ratio is deprecated since XGBoost 0.82, we recommend to explicitly" +
         " pass a training and multiple evaluation datasets by passing 'eval_sets' and " +
         "'eval_set_names'")
     }
@@ -357,7 +357,7 @@ object XGBoost extends Serializable {
       val addrs = resources("gpu").addresses
       if (addrs.size > 1) {
         // TODO should we throw exception ?
-        logger.warn("XGBoost only supports 1 gpu per worker")
+        System.err.println("xgboost4j-spark logger " + "XGBoost only supports 1 gpu per worker")
       }
       // take the first one
       addrs.head.toInt
@@ -402,7 +402,7 @@ object XGBoost extends Serializable {
         } else {
           getGPUAddrFromResources
         }
-        logger.info("Leveraging gpu device " + gpuId + " to train")
+        System.err.println("xgboost4j-spark logger " + "Leveraging gpu device " + gpuId + " to train")
         params = params + ("gpu_id" -> gpuId)
       }
       val booster = if (makeCheckpoint) {
@@ -418,7 +418,7 @@ object XGBoost extends Serializable {
       Iterator(booster -> watches.toMap.keys.zip(metrics).toMap)
     } catch {
       case xgbException: XGBoostError =>
-        logger.error(s"XGBooster worker $taskId has failed $attempt times due to ", xgbException)
+        System.err.println("xgboost4j-spark logger " + s"XGBooster worker $taskId has failed $attempt times due to ", xgbException)
         throw xgbException
     } finally {
       Rabit.shutdown()
@@ -469,7 +469,7 @@ object XGBoost extends Serializable {
         rddOfIterWrapper.zipPartitions(rddOfIter){
           (itrWrapper, itr) =>
             if (!itr.hasNext) {
-              logger.error("when specifying eval sets as dataframes, you have to ensure that " +
+              System.err.println("xgboost4j-spark logger " + "when specifying eval sets as dataframes, you have to ensure that " +
                 "the number of elements in each dataframe is larger than the number of workers")
               throw new Exception("too few elements in evaluation sets")
             }
@@ -574,7 +574,7 @@ object XGBoost extends Serializable {
       hasGroup: Boolean = false,
       evalSetsMap: Map[String, RDD[XGBLabeledPoint]] = Map()):
     (Booster, Map[String, Array[Float]]) = {
-    logger.info(s"Running XGBoost ${spark.VERSION} with parameters:\n${params.mkString("\n")}")
+    System.err.println("xgboost4j-spark logger " + s"Running XGBoost ${spark.VERSION} with parameters:\n${params.mkString("\n")}")
     val xgbParamsFactory = new XGBoostExecutionParamsFactory(params, trainingData.sparkContext)
     val xgbExecParams = xgbParamsFactory.buildXGBRuntimeParams
     val xgbRabitParams = xgbParamsFactory.buildRabitParams.asJava
@@ -619,7 +619,7 @@ object XGBoost extends Serializable {
           tracker.waitFor(0L)
         }
 
-        logger.info(s"Rabit returns with exit code $trackerReturnVal")
+        System.err.println("xgboost4j-spark logger " + s"Rabit returns with exit code $trackerReturnVal")
         val (booster, metrics) = postTrackerReturnProcessing(trackerReturnVal,
           boostersAndMetrics, sparkJobThread)
         (booster, metrics)
@@ -640,7 +640,7 @@ object XGBoost extends Serializable {
     } catch {
       case t: Throwable =>
         // if the job was aborted due to an exception
-        logger.error("the job was aborted due to ", t)
+        System.err.println("xgboost4j-spark logger " + "the job was aborted due to ", t)
         if (xgbExecParams.killSparkContextOnWorkerFailure) {
           trainingData.sparkContext.stop()
         }
@@ -686,7 +686,7 @@ object XGBoost extends Serializable {
   private[spark] def repartitionForTrainingGroup(
       trainingData: RDD[XGBLabeledPoint], nWorkers: Int): RDD[Array[XGBLabeledPoint]] = {
     val allGroups = aggByGroupInfo(trainingData)
-    logger.info(s"repartitioning training group set to $nWorkers partitions")
+    System.err.println("xgboost4j-spark logger " + s"repartitioning training group set to $nWorkers partitions")
     allGroups.repartition(nWorkers)
   }
 
@@ -710,7 +710,7 @@ object XGBoost extends Serializable {
         rddOfIterWrapper.zipPartitions(rddOfIter){
           (itrWrapper, itr) =>
             if (!itr.hasNext) {
-              logger.error("when specifying eval sets as dataframes, you have to ensure that " +
+              System.err.println("xgboost4j-spark logger " + "when specifying eval sets as dataframes, you have to ensure that " +
                 "the number of elements in each dataframe is larger than the number of workers")
               throw new Exception("too few elements in evaluation sets")
             }
@@ -745,7 +745,7 @@ object XGBoost extends Serializable {
         }
       } catch {
         case _: InterruptedException =>
-          logger.info("spark job thread is interrupted")
+          System.err.println("xgboost4j-spark logger " + "spark job thread is interrupted")
       }
       throw new XGBoostError("XGBoostModel training failed")
     }

@@ -133,7 +133,7 @@ public class XGBoost {
         ecm.updateCheckpoint(booster);
       }
     } catch (Exception e) {
-      logger.error("failed to save checkpoint in XGBoost4J at iteration " + iter, e);
+      System.err.println("xgboost4j logger " + "failed to save checkpoint in XGBoost4J at iteration " + iter + e);
       throw new XGBoostError("failed to save checkpoint in XGBoost4J at iteration" + iter, e);
     }
   }
@@ -296,7 +296,7 @@ public class XGBoost {
               earlyStoppingRounds, booster,
               -1, null, null);
     } catch (IOException e) {
-      logger.error("training failed in xgboost4j", e);
+      System.err.println("xgboost4j logger " + "training failed in xgboost4j" + e);
       throw new XGBoostError("training failed in xgboost4j ", e);
     }
   }
@@ -352,8 +352,8 @@ public class XGBoost {
       assert(maximize != null);
       return Boolean.valueOf(maximize);
     } catch (Exception ex) {
-      logger.error("maximize_evaluation_metrics has to be specified for enabling early stop," +
-              " allowed value: true/false", ex);
+      System.err.println("xgboost4j logger " + "maximize_evaluation_metrics has to be specified for enabling early stop," +
+              " allowed value: true/false" + ex);
       throw ex;
     }
   }
@@ -400,7 +400,7 @@ public class XGBoost {
       }
 
       evalHist[i] = aggCVResults(results);
-      logger.info(evalHist[i]);
+      System.err.println("xgboost4j logger " + evalHist[i]);
     }
     return evalHist;
   }

@@ -741,7 +741,7 @@ public class Booster implements Serializable, KryoSerializable {
       out.writeObject(this.toByteArray());
     } catch (XGBoostError ex) {
       ex.printStackTrace();
-      logger.error(ex.getMessage());
+      System.err.println("xgboost4j logger " + ex.getMessage());
     }
   }
 
@@ -754,7 +754,7 @@ public class Booster implements Serializable, KryoSerializable {
       XGBoostJNI.checkCall(XGBoostJNI.XGBoosterLoadModelFromBuffer(this.handle, bytes));
     } catch (XGBoostError ex) {
       ex.printStackTrace();
-      logger.error(ex.getMessage());
+      System.err.println("xgboost4j logger " + ex.getMessage());
     }
   }
 
@@ -780,7 +780,7 @@ public class Booster implements Serializable, KryoSerializable {
       output.writeInt(version);
       output.write(serObj);
     } catch (XGBoostError ex) {
-      logger.error(ex.getMessage(), ex);
+      System.err.println("xgboost4j logger " + ex.getMessage() + " " + ex.toString());
     }
   }
 
@@ -794,7 +794,7 @@ public class Booster implements Serializable, KryoSerializable {
       input.readBytes(bytes);
       XGBoostJNI.checkCall(XGBoostJNI.XGBoosterLoadModelFromBuffer(this.handle, bytes));
     } catch (XGBoostError ex) {
-      logger.error(ex.getMessage(), ex);
+      System.err.println("xgboost4j logger " + ex.getMessage() + " " + ex.toString());
     }
   }
 }

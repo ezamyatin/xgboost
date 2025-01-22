@@ -28,7 +28,7 @@ public class TrackerProperties {
         inputStream = propertiesFileURL.openStream();
       }
     } catch (IOException e) {
-      logger.warn("Could not load " + PROPERTIES_FILENAME + " file. ", e);
+      System.err.println("xgboost4j logger " + "Could not load " + PROPERTIES_FILENAME + " file. " + e);
     }
 
     if(inputStream != null){
@@ -36,7 +36,7 @@ public class TrackerProperties {
         properties.load(inputStream);
         logger.debug("Loaded properties from external source");
       } catch (IOException e) {
-        logger.error("Error loading tracker properties file. Skipping and using defaults. ", e);
+        System.err.println("xgboost4j logger " + "Error loading tracker properties file. Skipping and using defaults. " + e);
       }
       try {
         inputStream.close();

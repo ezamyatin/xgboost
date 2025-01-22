@@ -82,10 +82,10 @@ class SparkParallelismTracker(
    */
   def execute[T](body: => T): T = {
     if (timeout <= 0) {
-      logger.info("starting training without setting timeout for waiting for resources")
+      System.err.println("xgboost4j-spark logger " + "starting training without setting timeout for waiting for resources")
       safeExecute(body)
     } else {
-      logger.info(s"starting training with timeout set as $timeout ms for waiting for resources")
+      System.err.println("xgboost4j-spark logger " + s"starting training with timeout set as $timeout ms for waiting for resources")
       if (!waitForCondition(numAliveCores >= requestedCores, timeout)) {
         throw new IllegalStateException(s"Unable to get $requestedCores cores for XGBoost training")
       }
@@ -121,10 +121,10 @@ class TaskFailedListener(killSparkContext: Boolean = true) extends SparkListener
   override def onTaskEnd(taskEnd: SparkListenerTaskEnd): Unit = {
     taskEnd.reason match {
       case taskEndReason: TaskFailedReason =>
-        logger.error(s"Training Task Failed during XGBoost Training: " +
+        System.err.println("xgboost4j-spark logger " + s"Training Task Failed during XGBoost Training: " +
             s"$taskEndReason")
         if (killSparkContext) {
-          logger.error("killing SparkContext")
+          System.err.println("xgboost4j-spark logger " + "killing SparkContext")
           TaskFailedListener.startedSparkContextKiller()
         } else {
           val stageId = taskEnd.stageId
@@ -133,7 +133,7 @@ class TaskFailedListener(killSparkContext: Boolean = true) extends SparkListener
           jobIdToStageIds.foreach {
             case (jobId, stageIds) =>
               if (stageIds.contains(stageId)) {
-                logger.error("Cancelling jobId:" + jobId)
+                System.err.println("xgboost4j-spark logger " + "Cancelling jobId:" + jobId)
                 jobIdToStageIds.remove(jobId)
                 SparkContext.getOrCreate().cancelJob(jobId)
               }

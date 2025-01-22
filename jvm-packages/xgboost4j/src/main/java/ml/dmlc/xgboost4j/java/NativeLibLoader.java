@@ -47,7 +47,7 @@ class NativeLibLoader {
               platform + "/" + System.mapLibraryName(libName);
           loadLibraryFromJar(libraryPathInJar);
         } catch (IOException ioe) {
-          logger.error("failed to load " + libName + " library from jar for platform " + platform);
+          System.err.println("xgboost4j logger " + "failed to load " + libName + " library from jar for platform " + platform);
           throw ioe;
         }
       }

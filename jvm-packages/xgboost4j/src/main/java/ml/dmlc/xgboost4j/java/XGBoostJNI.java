@@ -33,7 +33,7 @@ class XGBoostJNI {
     try {
       NativeLibLoader.initXGBoost();
     } catch (Exception ex) {
-      logger.error("Failed to load native library", ex);
+      System.err.println("xgboost4j logger " + "Failed to load native library" + ex);
       throw new RuntimeException(ex);
     }
   }

@@ -47,7 +47,7 @@ class EvalError extends EvalTrait {
       labels = dmat.getLabel
     } catch {
       case ex: XGBoostError =>
-        logger.error(ex)
+        System.err.println("xgboost4j-spark logger  " + ex)
         return -1f
     }
     require(predicts.length == labels.length, s"predicts length ${predicts.length} has to be" +

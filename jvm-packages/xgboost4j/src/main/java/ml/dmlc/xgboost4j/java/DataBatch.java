@@ -116,7 +116,7 @@ class DataBatch {
         rowOffset[batch.size()] = offset;
         return new DataBatch(rowOffset, weight, label, featureIndex, featureValue, numCol, ndim);
       } catch (RuntimeException runtimeError) {
-        logger.error(runtimeError);
+        System.err.println("xgboost4j logger " + runtimeError);
         return null;
       }
     }
